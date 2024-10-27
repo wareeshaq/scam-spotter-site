@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Spot the Difference Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Days+One&family=Roboto&family=Shrikhand&family=Silkscreen&family=Yeseva+One&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Days+One&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto&family=Shrikhand&family=Silkscreen&family=Yeseva+One&display=swap" rel="stylesheet">
+    
+</head>
+<body class="flex flex-col items-center justify-center h-screen m-0 " style="background-color: #FFA69E; color: #861657;">
+    
+    <h1 class="text-2xl mb-4">What makes this email suspicious?</h1>
+    
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas" width="713" height="343" class="border-2 mb-2" style = "border: 4px solid #861657;"></canvas>
+    
+    <div id="message" class="text-lg mb-2 font-['Days One']">Find all the flags in the image!</div>
+    <div id="score" class="text-xl font-bold">Score: 0</div> <!-- Score display -->
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const img = new Image();
+
+        // Load the image onto the canvas
+        img.src = "susemail.PNG";  // Path to the image file
+        img.onload = () => {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            document.getElementById("message").innerText = "Image loaded! Start finding flags.";
+        };
+        img.onerror = () => {
+            document.getElementById("message").innerText = "Image failed to load. Check the file path.";
+        };
+
+        // Define flag locations and state
+        const blackFlags = [{x: 71, y: 298}, {x: 398, y: 197}, {x: 166, y: 148}, {x: 98, y: 165}, {x: 487, y: 231}];
+        const redFlags = [{x: 26, y: 31}, {x: 102, y: 280}];
+        let foundFlags = [];
+        let score = 0;
+
+        // Update score display
+        function updateScore() {
+            document.getElementById("score").innerText = "Score: " + score;
+        }
+
+        // Check clicks for flags and draw circles if correct
+        canvas.addEventListener("click", (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            let found = false;
+
+            // Log the click position for debugging
+            console.log(`Clicked at: (${x}, ${y})`);
+
+            // Check black flags
+            blackFlags.forEach(flag => {
+                if (!foundFlags.includes(flag) && Math.abs(x - flag.x) < 20 && Math.abs(y - flag.y) < 20) {
+                    foundFlags.push(flag);
+                    score += 10;
+                    found = true;
+                    drawCircle(flag.x, flag.y, "black");
+                    document.getElementById("message").innerText = "You found a BLACK FLAG! +10 Points";
+                    updateScore(); // Update score display
+                    console.log(`Found BLACK FLAG at: (${flag.x}, ${flag.y})`);
+                }
+            });
+
+            // Check red flags
+            redFlags.forEach(flag => {
+                if (!foundFlags.includes(flag) && Math.abs(x - flag.x) < 20 && Math.abs(y - flag.y) < 20) {
+                    foundFlags.push(flag);
+                    score += 5;
+                    found = true;
+                    drawCircle(flag.x, flag.y, "red");
+                    document.getElementById("message").innerText = "You found a RED FLAG! +5 Points";
+                    updateScore(); // Update score display
+                    console.log(`Found RED FLAG at: (${flag.x}, ${flag.y})`);
+                }
+            });
+
+            // If no flag found
+            if (!found) {
+                document.getElementById("message").innerText = "...that was not it. Try again!";
+                console.log("No flag found.");
+            }
+
+            // If all flags are found
+            if (foundFlags.length === blackFlags.length + redFlags.length) {
+                document.getElementById("message").innerText = `You found all the flags! Final Score: ${score}`;
+                console.log("All flags found!");
+            }
+        });
+
+        // Draw circle around the flag location
+        function drawCircle(x, y, color) {
+            ctx.beginPath();
+            ctx.arc(x, y, 15, 0, 2 * Math.PI);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+    </script>
+
+</body>
+</html>
